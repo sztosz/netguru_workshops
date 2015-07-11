@@ -5,7 +5,10 @@ Rails.application.routes.draw do
     end
   end
 
-  devise_for :users
+  devise_for :users, :controllers => { :registrations => 'user_registrations' }
+  as :user do
+    post '/login' => 'devise/sessions#new', as: :session_path
+  end
 
   root 'categories#index'
 end
