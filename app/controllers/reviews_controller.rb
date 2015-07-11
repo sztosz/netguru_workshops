@@ -2,18 +2,18 @@ class ReviewsController < ApplicationController
 
   expose(:review)
   expose(:product)
+  before_action :authenticate_user!
 
   def edit
   end
 
   def create
-    self.review = Review.new(review_params)
-
+    review = Review.new(review_params)
     if review.save
       product.reviews << review
       redirect_to category_product_url(product.category, product), notice: 'Review was successfully created.'
     else
-      render action: 'new'
+      redirect_to(:back)
     end
   end
 
@@ -24,6 +24,6 @@ class ReviewsController < ApplicationController
 
   private
     def review_params
-      params.require(:review).permit(:content, :rating)
+      params.require(:review).permit(:content, :rating).merge(user: current_user)
     end
 end
