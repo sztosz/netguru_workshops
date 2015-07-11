@@ -4,7 +4,7 @@ class ProductsController < ApplicationController
   expose(:product)
   expose(:review) { Review.new }
   expose_decorated(:reviews, ancestor: :product)
-  before_action :authenticate_user! #, :is_owner?
+  before_action :authenticate_user!
 
   def index
   end
@@ -16,7 +16,8 @@ class ProductsController < ApplicationController
   end
 
   def edit
-    unless user_is_owner?(Product.find_by(id: params[:product_id]))
+    # raise NoMemoryError
+    unless user_is_owner?(Product.find_by(id: params[:id]))
       flash[:error] = 'You are not allowed to edit this product.'
       redirect_to category_product_url(category, product)
     end
@@ -24,7 +25,7 @@ class ProductsController < ApplicationController
 
   def create
     self.product = Product.new(product_params)
-
+    self.product.user = current_user
     if product.save
       category.products << product
       flash[:notice] = 'Product was successfully created.'
