@@ -15,6 +15,9 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.syntax = :should
   end
+  config.expect_with :rspec do |expect|
+    expect.syntax = [:should, :expect]
+  end
   # ## Mock Framework
   #
   # If you prefer to use mocha, flexmock or RR, uncomment the appropriate line:
