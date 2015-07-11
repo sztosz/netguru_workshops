@@ -4,6 +4,7 @@ class ProductsController < ApplicationController
   expose(:product)
   expose(:review) { Review.new }
   expose_decorated(:reviews, ancestor: :product)
+  before_action :authenticate_user! #, :is_owner?
 
   def index
   end
@@ -15,6 +16,10 @@ class ProductsController < ApplicationController
   end
 
   def edit
+    unless user_is_owner?(Product.find_by(id: params[:product_id]))
+      flash[:error] = 'You are not allowed to edit this product.'
+      redirect_to category_product_url(category, product)
+    end
   end
 
   def create
@@ -22,17 +27,25 @@ class ProductsController < ApplicationController
 
     if product.save
       category.products << product
-      redirect_to category_product_url(category, product), notice: 'Product was successfully created.'
+      flash[:notice] = 'Product was successfully created.'
+      redirect_to category_product_url(category, product)
     else
       render action: 'new'
     end
   end
 
   def update
-    if self.product.update(product_params)
-      redirect_to category_product_url(category, product), notice: 'Product was successfully updated.'
+    if user_is_owner?(product)
+      if self.product.update(product_params)
+        flash[:notice] = 'Product was successfully created.'
+        redirect_to category_product_url(category, product)
+      else
+
+        render action: 'edit'
+      end
     else
-      render action: 'edit'
+      flash[:error] = 'You are not allowed to edit this product.'
+      redirect_to category_product_url(category, product)
     end
   end
 
@@ -43,6 +56,10 @@ class ProductsController < ApplicationController
   end
 
   private
+
+  def user_is_owner?(product)
+    current_user.products.exists?(product)
+  end
 
   def product_params
     params.require(:product).permit(:title, :description, :price, :category_id)
