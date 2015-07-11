@@ -2,12 +2,14 @@ require 'spec_helper'
 
 describe ProductsController do
   let(:category)      { create(:category) }
+  let(:user) { create(:user) }
   let(:valid_attributes) do
     {
       title: 'MyString',
       description: 'Some description',
       price: 2.5,
       category_id: category.id,
+      user: user
     }
   end
 
@@ -201,7 +203,7 @@ describe ProductsController do
         it "re-renders the 'edit' template" do
           Product.any_instance.stub(:save).and_return(false)
           put :update, { id: product.to_param, product: { 'title' => 'invalid value' }, category_id: category.to_param }
-          expect(response).to redirect_to(category_product_url(category, product))
+          expect(response).to render_template('edit')
         end
       end
     end
